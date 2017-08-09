@@ -6,11 +6,14 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var MongoClient = require('mongodb').MongoClient;
+var assert = require('assert');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
 
 var app = express();
+app.use(bodyParser.json());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -44,5 +47,50 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+
+console.log("listening..");
+
+
+/*var url = 'mongodb://212.237.20.140:27017/denemedb';
+MongoClient.connect(url, function(err, db) {
+    assert.equal(null, err);
+    console.log("Connected correctly to server.");
+    db.close();
+});*/
+
+
+app.get('/deneme', function(req, res){
+    res.send('sth happened');
+});
+
+app.get('/ez', function(req, res){
+    res.send('get shit happened');
+});
+
+
+app.post('/ez', function(req, res){
+
+    var received = req.body;
+    console.log(received);
+    //res.send('post shit happened');
+
+
+    MongoClient.connect(url, function(err, db)
+    {
+        if (err) throw err;
+        db.collection("elements").insertOne(received, function(err, res) {
+            if (err) throw err;
+            console.log("1 document inserted");
+
+            db.close();
+        });
+    });
+
+    res.send('succesfuly saved to db');
+
+});
+
+app.listen(8080);
 
 module.exports = app;
